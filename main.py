@@ -154,6 +154,14 @@ class LoginApp(QWidget):
 
     def login(self):
         """登录操作"""
+
+        # 禁用按钮和输入框
+        self.ui.button_login.setEnabled(False)
+        self.ui.button_logout.setEnabled(False)
+        self.ui.input_username.setEnabled(False)
+        self.ui.input_password.setEnabled(False)
+        self.ui.checkbox_autologin.setEnabled(False)
+
         data = {
             "wlanacname": "NFV-BASE",
             "vlan": "0",
@@ -168,12 +176,21 @@ class LoginApp(QWidget):
 
         print(f"登录请求数据 (编码后): {encoded_data}")  # 日志输出
 
+        check_network_status()
+
         # 启动登录线程，避免UI卡顿
         self.login_thread = LoginThread(self.login_url, self.headers, encoded_data)
         self.login_thread.login_result.connect(self.handle_login_result)
         self.login_thread.start()
 
     def handle_login_result(self, success, message):
+        # 操作完成，恢复按钮和输入框
+        self.ui.button_login.setEnabled(True)
+        self.ui.button_logout.setEnabled(True)
+        self.ui.input_username.setEnabled(True)
+        self.ui.input_password.setEnabled(True)
+        self.ui.checkbox_autologin.setEnabled(True)
+
         if success:
             # 弹出一个 InfoBar，通知用户登录成功，并提示将在 5 秒后关闭程序
             InfoBar.success(
@@ -246,6 +263,13 @@ class LoginApp(QWidget):
 
     def logout(self):
         """下线操作"""
+        # 禁用按钮和输入框
+        self.ui.button_login.setEnabled(False)
+        self.ui.button_logout.setEnabled(False)
+        self.ui.input_username.setEnabled(False)
+        self.ui.input_password.setEnabled(False)
+        self.ui.checkbox_autologin.setEnabled(False)
+
         url = "http://10.9.11.145/cgi-bin/wlogout.cgi"
         print("发送下线请求...")  # 日志输出
         try:
@@ -277,6 +301,13 @@ class LoginApp(QWidget):
                 duration=3000,
                 parent=self
             )
+        finally:
+            # 操作完成，恢复按钮和输入框
+            self.ui.button_login.setEnabled(True)
+            self.ui.button_logout.setEnabled(True)
+            self.ui.input_username.setEnabled(True)
+            self.ui.input_password.setEnabled(True)
+            self.ui.checkbox_autologin.setEnabled(True)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
