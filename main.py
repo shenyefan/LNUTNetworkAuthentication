@@ -3,7 +3,7 @@ import requests
 from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtCore import QTimer
 from qfluentwidgets import Theme, setTheme, InfoBar, InfoBarPosition
-from LoginWindow import Ui_Form  # 这里直接引用由uic生成的.py文件
+from LoginWindow import Ui_Form
 from utils.config_manager import ConfigManager
 from utils.login_manager import LoginManager
 from utils.network import get_ip_address, get_mac_address, is_network_connected, ping_test
