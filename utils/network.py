@@ -1,8 +1,7 @@
 import socket
 import uuid
 import requests
-import subprocess
-import os
+
 
 def get_ip_address():
     """获取本机IP地址"""
@@ -39,20 +38,16 @@ def is_network_connected():
         print(f"网络请求异常: {e}")  # 保留详细错误日志
         return False
 
-def ping_test(target):
+def ping_test(target, timeout=2):
     """执行Ping测试"""
     success = False
     for i in range(5):
         try:
-            param = '-n' if os.name == 'nt' else '-c'
-            command = ['ping', param, '1', target]
-            result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if result.returncode == 0:
+            # 尝试通过 socket 连接目标主机
+            with socket.create_connection((target, 80), timeout):
                 print(f"第 {i + 1} 次 Ping {target} 成功")
                 success = True
                 break
-            else:
-                print(f"第 {i + 1} 次 Ping {target} 失败，返回码: {result.returncode}")  # 保留详细错误日志
-        except Exception as e:
-            print(f"Ping 失败: {e}")  # 保留详细错误日志
+        except (socket.timeout, socket.error) as e:
+            print(f"第 {i + 1} 次 Ping {target} 失败: {e}")
     return success
