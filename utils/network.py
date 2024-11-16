@@ -28,7 +28,7 @@ def get_mac_address():
 def is_network_connected():
     """检查网络连接是否正常"""
     try:
-        response = requests.get('http://www.gstatic.com/generate_204', timeout=3)
+        response = requests.get('https://www.gstatic.com/generate_204', timeout=3)
         if response.status_code == 204:
             return True
         else:

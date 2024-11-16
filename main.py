@@ -1,12 +1,25 @@
 import sys
 import requests
 from PySide6.QtWidgets import QApplication, QWidget
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QThread, Signal
 from qfluentwidgets import Theme, setTheme, InfoBar, InfoBarPosition
 from LoginWindow import Ui_Form
 from utils.config_manager import ConfigManager
 from utils.login_manager import LoginManager
 from utils.network import get_ip_address, get_mac_address, is_network_connected, ping_test
+
+class NetworkWorker(QThread):
+    network_status = Signal(bool, bool)  # 添加一个额外的参数
+
+    def __init__(self, target, parent=None):
+        super().__init__(parent)
+        self.target = target
+
+    def run(self):
+        """同时执行Ping测试和网络连接检测"""
+        success_ping = ping_test(self.target)
+        success_network = is_network_connected()
+        self.network_status.emit(success_ping, success_network)
 
 
 class LoginApp(QWidget):
@@ -56,20 +69,26 @@ class LoginApp(QWidget):
 
     def check_network_status(self):
         """检查网络状态"""
-        if ping_test('10.9.18.71'):
-            if is_network_connected():
+        # 启动后台线程检测网络
+        self.network_worker = NetworkWorker('10.9.18.71', self)
+        self.network_worker.network_status.connect(self.handle_network_status)  # 连接信号到处理槽
+        self.network_worker.start()
+
+    def handle_network_status(self, success_ping, success_network):
+        if success_ping:
+            if success_network:
                 self.show_info_bar("状态", "网络已连接", "success")
                 self.start_close_timer()
             else:
                 self.show_info_bar("状态", "校园网未登录", "warning")
                 if self.ui.checkbox_autologin.isChecked():
-                    self.show_info_bar("状态", "尝试登录中", "info")
-                    self.login()
+                    QTimer.singleShot(1000, self.login)
         else:
             self.show_info_bar("状态", "未连接到校园网", "error")
             self.start_close_timer()
 
     def login(self):
+        self.show_info_bar("状态", "尝试登录中", "info")
         """执行登录操作"""
         self.toggle_ui(False)
         ip_address = get_ip_address()
