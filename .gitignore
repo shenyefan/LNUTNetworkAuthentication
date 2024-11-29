@@ -2,5 +2,9 @@
 /.idea/
 /build/
 /dist/
+/main.build/
+/main.onefile-build/
+/main.dist/
 config.ini
 main.spec
+main.exe

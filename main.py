@@ -109,19 +109,18 @@ class LoginApp(QWidget):
             self.start_close_timer()
         else:
             self.show_info_bar("登录失败", message, "error")
-        self.toggle_ui(True)
+        QTimer.singleShot(1000, lambda: self.toggle_ui(True))
 
     def logout(self):
         """执行下线操作"""
+        self.toggle_ui(False)
         # 中断任何现存的关闭倒计时
         if self.timer and self.timer.isActive():
             self.timer.stop()
             self.show_info_bar("状态", "关闭操作已取消", "info")
-
         url = "http://10.9.11.145/cgi-bin/wlogout.cgi"
-        self.toggle_ui(False)
         try:
-            response = requests.get(url, timeout=5)
+            response = requests.get(url, timeout=1)
             if response.status_code == 200:
                 self.show_info_bar("状态", "下线成功", "success")
             else:
@@ -129,7 +128,7 @@ class LoginApp(QWidget):
         except Exception as e:
             self.show_info_bar("请求失败", f"错误: {e}", "error")
         finally:
-            self.toggle_ui(True)
+            QTimer.singleShot(1000, lambda: self.toggle_ui(True))
 
     def toggle_ui(self, enable):
         """切换UI控件的可用状态"""
