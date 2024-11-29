@@ -69,6 +69,7 @@ class LoginApp(QWidget):
 
     def check_network_status(self):
         """检查网络状态"""
+        self.show_info_bar("状态", "检测网络连接中", "info")
         # 启动后台线程检测网络
         self.network_worker = NetworkWorker('10.9.18.71', self)
         self.network_worker.network_status.connect(self.handle_network_status)  # 连接信号到处理槽
@@ -78,6 +79,7 @@ class LoginApp(QWidget):
         if success_ping:
             if success_network:
                 self.show_info_bar("状态", "网络已连接", "success")
+                self.toggle_login_ui(False)
                 self.start_close_timer()
             else:
                 self.show_info_bar("状态", "校园网未登录", "warning")

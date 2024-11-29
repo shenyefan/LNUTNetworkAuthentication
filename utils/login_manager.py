@@ -35,7 +35,7 @@ class LoginManager:
 
         # 发送登录请求
         try:
-            response = requests.post(self.login_url, headers=self.headers, data=encoded_data, timeout=2)
+            response = requests.post(self.login_url, headers=self.headers, data=encoded_data, timeout=3)
 
             # 处理服务器响应
             if "成功登陆" in response.text:
