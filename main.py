@@ -90,7 +90,7 @@ class LoginApp(QWidget):
     def login(self):
         self.show_info_bar("状态", "尝试登录中", "info")
         """执行登录操作"""
-        self.toggle_ui(False)
+        self.toggle_all_ui(False)
         ip_address = get_ip_address()
         mac_address = get_mac_address()
 
@@ -105,15 +105,16 @@ class LoginApp(QWidget):
 
         if success:
             self.show_info_bar("登录成功", "将在5秒后关闭", "success")
+            self.toggle_logout_ui(True)
             self.save_credentials()
             self.start_close_timer()
         else:
             self.show_info_bar("登录失败", message, "error")
-        QTimer.singleShot(1000, lambda: self.toggle_ui(True))
+            QTimer.singleShot(1000, lambda: self.toggle_all_ui(True))
 
     def logout(self):
         """执行下线操作"""
-        self.toggle_ui(False)
+        self.toggle_all_ui(False)
         # 中断任何现存的关闭倒计时
         if self.timer and self.timer.isActive():
             self.timer.stop()
@@ -128,12 +129,22 @@ class LoginApp(QWidget):
         except Exception as e:
             self.show_info_bar("请求失败", f"错误: {e}", "error")
         finally:
-            QTimer.singleShot(1000, lambda: self.toggle_ui(True))
+            QTimer.singleShot(1000, lambda: self.toggle_all_ui(True))
 
-    def toggle_ui(self, enable):
+    def toggle_all_ui(self, enable):
         """切换UI控件的可用状态"""
         self.ui.button_login.setEnabled(enable)
         self.ui.button_logout.setEnabled(enable)
+        self.ui.input_username.setEnabled(enable)
+        self.ui.input_password.setEnabled(enable)
+        self.ui.checkbox_autologin.setEnabled(enable)
+    def toggle_logout_ui(self, enable):
+        """切换UI控件的可用状态"""
+        self.ui.button_logout.setEnabled(enable)
+
+    def toggle_login_ui(self, enable):
+        """切换UI控件的可用状态"""
+        self.ui.button_login.setEnabled(enable)
         self.ui.input_username.setEnabled(enable)
         self.ui.input_password.setEnabled(enable)
         self.ui.checkbox_autologin.setEnabled(enable)
