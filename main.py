@@ -8,6 +8,7 @@ from utils.config_manager import ConfigManager
 from utils.login_manager import LoginManager
 from utils.network import get_ip_address, get_mac_address, is_network_connected, ping_test
 
+
 class NetworkWorker(QThread):
     network_status = Signal(bool, bool)  # 添加一个额外的参数
 
@@ -45,6 +46,7 @@ class LoginApp(QWidget):
 
         # 保存倒计时定时器的实例
         self.timer = None
+        self.user_action_triggered = False  # 新增标志位
 
         # 加载保存的用户名和密码
         self.load_credentials()
@@ -84,12 +86,15 @@ class LoginApp(QWidget):
             else:
                 self.show_info_bar("状态", "校园网未登录", "warning")
                 if self.ui.checkbox_autologin.isChecked():
+                    if self.user_action_triggered:
+                        return  # 如果用户动作触发，则不执行后续操作
                     QTimer.singleShot(1000, self.login)
         else:
             self.show_info_bar("状态", "未连接到校园网", "error")
             self.start_close_timer()
 
     def login(self):
+        self.user_action_triggered = True  # 设置标志位
         self.show_info_bar("状态", "尝试登录中", "info")
         """执行登录操作"""
         self.toggle_all_ui(False)
@@ -115,6 +120,7 @@ class LoginApp(QWidget):
             QTimer.singleShot(1000, lambda: self.toggle_all_ui(True))
 
     def logout(self):
+        self.user_action_triggered = True  # 设置标志位
         """执行下线操作"""
         self.toggle_all_ui(False)
         # 中断任何现存的关闭倒计时
@@ -140,6 +146,7 @@ class LoginApp(QWidget):
         self.ui.input_username.setEnabled(enable)
         self.ui.input_password.setEnabled(enable)
         self.ui.checkbox_autologin.setEnabled(enable)
+
     def toggle_logout_ui(self, enable):
         """切换UI控件的可用状态"""
         self.ui.button_logout.setEnabled(enable)
